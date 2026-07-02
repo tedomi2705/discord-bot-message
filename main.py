@@ -3,6 +3,7 @@ import os
 
 import discord
 from dotenv import load_dotenv
+from prompt_toolkit import PromptSession
 
 
 def target_label(target_type: str, target: object) -> str:
@@ -30,10 +31,11 @@ async def run_bot(token: str, target_type: str, target_id: int) -> None:
 
             print(f"Bot đã sẵn sàng, gửi tới {target_label(target_type, target)}.")
             print("Nhấn Ctrl+C hoặc Ctrl+D để thoát.")
+            session = PromptSession()
             while not client.is_closed():
                 try:
-                    message = await asyncio.to_thread(input, "Nhập tin nhắn cần gửi: ")
-                except EOFError:
+                    message = await session.prompt_async("Nhập tin nhắn cần gửi: ")
+                except (EOFError, KeyboardInterrupt):
                     break
 
                 message = message.strip()
@@ -75,12 +77,13 @@ def main() -> None:
         target_type = "user"
         target_id = parse_id("USER_ID", user_id_text)
     else:
-        target_type = input("Gửi tới channel hay user? [channel/user]: ").strip().lower()
+        session = PromptSession()
+        target_type = session.prompt("Gửi tới channel hay user? [channel/user]: ").strip().lower()
         if target_type not in {"channel", "user"}:
             raise SystemExit("Đích gửi phải là channel hoặc user")
 
         id_name = "CHANNEL_ID" if target_type == "channel" else "USER_ID"
-        target_id_text = input(f"Nhập {id_name}: ").strip()
+        target_id_text = session.prompt(f"Nhập {id_name}: ").strip()
         if not target_id_text:
             raise SystemExit(f"Thiếu {id_name}")
 
