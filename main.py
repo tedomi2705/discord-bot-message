@@ -78,10 +78,11 @@ def main() -> None:
         target_id = parse_id("USER_ID", user_id_text)
     else:
         session = PromptSession()
-        target_type = session.prompt("Gửi tới channel hay user? [channel/user]: ").strip().lower()
-        if target_type not in {"channel", "user"}:
+        target_type = session.prompt("Gửi tới channel hay user? ([c]hannel/[u]ser): ").strip().lower()
+        if target_type not in {"channel", "user", "c", "u"}:
             raise SystemExit("Đích gửi phải là channel hoặc user")
-
+        if target_type in {"c", "u"}:
+            target_type = "channel" if target_type == "c" else "user"
         id_name = "CHANNEL_ID" if target_type == "channel" else "USER_ID"
         target_id_text = session.prompt(f"Nhập {id_name}: ").strip()
         if not target_id_text:
